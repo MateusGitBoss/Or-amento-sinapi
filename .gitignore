@@ -9,3 +9,5 @@ htmlcov/
 .ruff_cache/
 dist/
 artefatos/
+
+saida/

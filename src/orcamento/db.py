@@ -27,7 +27,9 @@ def migrar(conn: Conexao) -> list[str]:
             )
             """
         )
-    aplicadas = {r["versao"] for r in conn.execute("SELECT versao FROM schema_migrations")}
+        # Lido dentro da transação: assim cada migração abaixo roda na sua própria transação
+        # (e não como savepoint de uma transação aberta que ninguém confirmou)
+        aplicadas = {r["versao"] for r in conn.execute("SELECT versao FROM schema_migrations")}
 
     pasta = resources.files("orcamento") / "migrations"
     arquivos = sorted((p for p in pasta.iterdir() if p.name.endswith(".sql")), key=lambda p: p.name)

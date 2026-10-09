@@ -1,0 +1,28 @@
+# Uso: docker compose run --rm orcamento migrar
+#      docker compose run --rm orcamento importar dados/exemplo/SINAPI_exemplo_MA_202608.xlsx --referencia 2026-08
+#      docker compose run --rm orcamento orcar dados/exemplo/lista_reforma.txt --sem-ia
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orcamento
+    ports: ["5434:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 10
+    volumes: [dados:/var/lib/postgresql/data]
+
+  orcamento:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/orcamento
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes: ["./saida:/app/saida"]
+
+volumes:
+  dados:
